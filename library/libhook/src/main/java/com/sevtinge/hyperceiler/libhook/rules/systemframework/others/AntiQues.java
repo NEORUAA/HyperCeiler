@@ -29,7 +29,7 @@ import io.github.kyuubiran.ezxhelper.xposed.common.BeforeHookParam;
 import io.github.libxposed.api.XposedInterface;
 
 public class AntiQues extends BaseHook {
-    XposedInterface.MethodUnhooker<?> clHook;
+    XposedInterface.HookHandle clHook;
 
     @Override
     public void init() {

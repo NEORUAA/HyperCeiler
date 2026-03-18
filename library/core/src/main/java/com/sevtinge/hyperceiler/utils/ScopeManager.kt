@@ -66,21 +66,21 @@ object ScopeManager {
             }
 
             val serviceCallback = object : XposedService.OnScopeEventListener {
-                override fun onScopeRequestApproved(pkg: String) {
-                    callback.onScopeOperationSuccess("$pkg enabled successfully.")
+                override fun onScopeRequestApproved(packages: MutableList<String>) {
+                    if (packages.contains(packageName)) {
+                        callback.onScopeOperationSuccess("$packageName enabled successfully.")
+                    } else {
+                        callback.onScopeOperationFail("Scope request approved, but $packageName not in result.")
+                    }
                 }
 
-                override fun onScopeRequestDenied(pkg: String) {
-                    callback.onScopeOperationFail("Request for $pkg was denied.")
-                }
-
-                override fun onScopeRequestFailed(pkg: String, message: String) {
-                    callback.onScopeOperationFail("Failed to enable $pkg: $message")
+                override fun onScopeRequestFailed(message: String) {
+                    callback.onScopeOperationFail("Failed to enable $packageName: $message")
                 }
             }
 
             try {
-                service.requestScope(packageName, serviceCallback)
+                service.requestScope(listOf(packageName), serviceCallback)
             } catch (e: Exception) {
                 AndroidLog.e(TAG, "addScope failed", e)
                 callback.onScopeOperationFail(e.message ?: "Unknown error")
@@ -100,7 +100,8 @@ object ScopeManager {
             return@withContext "LSPosed service not available."
         }
         return@withContext try {
-            service.removeScope(packageName)
+            service.removeScope(listOf(packageName))
+            null
         } catch (e: Exception) {
             AndroidLog.e(TAG, "removeScope failed", e)
             e.message

@@ -36,7 +36,7 @@ import io.github.libxposed.api.XposedModuleInterface;
 public class AuthCreakPatch extends CorePatchHelper {
     private final String TAG = "AuthCreakPatch";
 
-    public void init(XposedModuleInterface.SystemServerLoadedParam lpparam) {
+    public void init(XposedModuleInterface.SystemServerStartingParam lpparam) {
         // Android 14+
         try {
             findAndHookMethod("com.android.server.pm.ScanPackageUtils", lpparam.getClassLoader(),

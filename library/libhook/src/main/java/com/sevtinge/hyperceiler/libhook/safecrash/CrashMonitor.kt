@@ -41,7 +41,7 @@ import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createBefo
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
 import io.github.libxposed.api.XposedModuleInterface
 
-class CrashMonitor(lpparam: XposedModuleInterface.SystemServerLoadedParam) {
+class CrashMonitor(lpparam: XposedModuleInterface.SystemServerStartingParam) {
     private val crashHandler: ICrashHandler = SafeModeHandler
 
     companion object {

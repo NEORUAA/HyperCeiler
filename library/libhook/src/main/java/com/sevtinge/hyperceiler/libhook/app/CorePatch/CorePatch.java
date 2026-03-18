@@ -36,7 +36,7 @@ import io.github.libxposed.api.XposedModuleInterface;
 public class CorePatch {
 
     private static final String TAG = "CorePatch";
-    public void onLoad(XposedModuleInterface.SystemServerLoadedParam lpparam) {
+    public void onLoad(XposedModuleInterface.SystemServerStartingParam lpparam) {
         XposedLog.i(TAG, "CorePatchLoad: Current sdk version is " + Build.VERSION.SDK_INT);
 
         if (!ProjectApi.isRelease()) {

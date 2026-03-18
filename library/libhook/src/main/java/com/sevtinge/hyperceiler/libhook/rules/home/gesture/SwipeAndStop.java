@@ -37,7 +37,7 @@ public class SwipeAndStop extends BaseHook {
     public void init() {
         Class<?> VibratorCls = findClassIfExists("android.os.Vibrator");
         hookAllMethods("com.miui.home.recents.GestureBackArrowView", "setReadyFinish", new IMethodHook() {
-            private XposedInterface.MethodUnhooker<?> vibratorHook = null;
+            private XposedInterface.HookHandle vibratorHook = null;
 
             @Override
             public void before(BeforeHookParam param) {

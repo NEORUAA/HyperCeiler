@@ -461,7 +461,20 @@ internal object EzxMethodHelper {
      */
     fun invokeOriginalMethod(method: Method, thisObject: Any?, vararg args: Any?): Any? {
         return try {
-            EzxModuleHolder.xposedModule.invokeOrigin(method, thisObject, *args)
+            val module = EzxModuleHolder.xposedModule
+            val argsArray = args as Array<Any?>
+            try {
+                val invokeOrigin = module.javaClass.getMethod(
+                    "invokeOrigin",
+                    Method::class.java,
+                    Any::class.java,
+                    Array<Any?>::class.java
+                )
+                invokeOrigin.invoke(module, method, thisObject, argsArray)
+            } catch (_: NoSuchMethodException) {
+                val invoker = module.getInvoker(method)
+                invokeWithInvoker(invoker, thisObject, argsArray, special = false, origin = true)
+            }
         } catch (t: Throwable) {
             XposedLog.e(TAG, "invokeOriginalMethod failed for ${formatMethodSignature(method)}", t)
             throw t
@@ -479,7 +492,84 @@ internal object EzxMethodHelper {
         val paramTypes = getParameterTypes(*args)
         val superClass = thisObject::class.java.superclass as Class<*>
         val method = findMethodBestMatch(superClass, methodName, *paramTypes)
-        EzxModuleHolder.xposedModule.invokeSpecial(method, thisObject, *args)
+        val module = EzxModuleHolder.xposedModule
+        val argsArray = args as Array<Any?>
+        try {
+            val invokeSpecial = module.javaClass.getMethod(
+                "invokeSpecial",
+                Method::class.java,
+                Any::class.java,
+                Array<Any?>::class.java
+            )
+            invokeSpecial.invoke(module, method, thisObject, argsArray)
+        } catch (_: NoSuchMethodException) {
+            val invoker = module.getInvoker(method)
+            invokeWithInvoker(invoker, thisObject, argsArray, special = true, origin = true)
+        }
+    }
+
+    private fun invokeWithInvoker(
+        invoker: Any,
+        thisObject: Any?,
+        args: Array<Any?>,
+        special: Boolean,
+        origin: Boolean,
+    ): Any? {
+        val invokerClass = invoker.javaClass
+        val typeValue = if (origin) resolveOriginType(invokerClass) else null
+        val methodName = if (special) "invokeSpecial" else "invoke"
+
+        if (typeValue != null) {
+            val typed = invokerClass.methods.firstOrNull { m ->
+                m.name == methodName && m.parameterTypes.size == 3
+            }
+            if (typed != null) {
+                return typed.invoke(invoker, typeValue, thisObject, args)
+            }
+
+            val withType = invokerClass.methods.firstOrNull { m ->
+                (m.name == "withType" || m.name == "setType") && m.parameterTypes.size == 1
+            }
+            if (withType != null) {
+                val configured = try {
+                    withType.invoke(invoker, typeValue) ?: invoker
+                } catch (_: Throwable) {
+                    invoker
+                }
+                val direct = configured.javaClass.methods.firstOrNull { m ->
+                    m.name == methodName && m.parameterTypes.size == 2
+                }
+                if (direct != null) {
+                    return direct.invoke(configured, thisObject, args)
+                }
+            }
+        }
+
+        val fallback = invokerClass.methods.firstOrNull { m ->
+            m.name == methodName && m.parameterTypes.size == 2
+        }
+        if (fallback != null) {
+            return fallback.invoke(invoker, thisObject, args)
+        }
+
+        throw NoSuchMethodError("No invoker method found for $methodName")
+    }
+
+    private fun resolveOriginType(invokerClass: Class<*>): Any? {
+        val candidates = listOf(
+            "io.github.libxposed.api.XposedInterface\$Invoker\$Type",
+            "io.github.libxposed.api.Invoker\$Type"
+        )
+        for (name in candidates) {
+            try {
+                val typeClass = Class.forName(name, false, invokerClass.classLoader)
+                val field = typeClass.getField("ORIGIN")
+                return field.get(null)
+            } catch (_: Throwable) {
+                // ignore
+            }
+        }
+        return null
     }
 
     // ==================== 内部辅助方法 ====================

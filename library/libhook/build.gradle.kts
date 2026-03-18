@@ -69,7 +69,7 @@ dependencies {
     api(libs.expansion)
     compileOnlyApi(projects.library.hiddenApi)
 
-    // libxposed API 100
+    // libxposed API 101
     compileOnlyApi(libs.libxposed.api)
     compileOnlyApi(project(":library:libxposed-compat"))
     api(libs.libxposed.service) {
@@ -77,7 +77,8 @@ dependencies {
     }
 
     api(libs.dexkit)
-    api(libs.bundles.ezxhelper)
+    api(libs.ezxhelper.core)
+    api(libs.ezxhelper.android.utils)
     api(libs.hiddenapibypass)
     api(libs.gson)
     api(libs.hyperfocusapi)

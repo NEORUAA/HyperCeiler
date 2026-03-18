@@ -33,9 +33,9 @@ import java.util.List;
 
 import io.github.kyuubiran.ezxhelper.xposed.EzXposed;
 import io.github.libxposed.api.XposedInterface;
-import io.github.libxposed.api.XposedInterface.MethodUnhooker;
-import io.github.libxposed.api.XposedModuleInterface.PackageLoadedParam;
-import io.github.libxposed.api.XposedModuleInterface.SystemServerLoadedParam;
+import io.github.libxposed.api.XposedInterface.HookHandle;
+import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam;
+import io.github.libxposed.api.XposedModuleInterface.SystemServerStartingParam;
 
 /**
  * Hook 基类
@@ -74,14 +74,14 @@ public abstract class BaseHook {
     /**
      * 获取包加载参数 (应用)
      */
-    public PackageLoadedParam getLpparam() {
+    public PackageReadyParam getLpparam() {
         return BaseLoad.getLpparam();
     }
 
     /**
      * 获取包加载参数 (系统框架)
      */
-    public SystemServerLoadedParam getSystemParam() {
+    public SystemServerStartingParam getSystemParam() {
         return BaseLoad.getSystemServerParam();
     }
 
@@ -221,9 +221,9 @@ public abstract class BaseHook {
      *
      * @param method   要 Hook 的方法
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
-    public MethodUnhooker<?> hookMethod(Method method, IMethodHook callback) {
+    public HookHandle hookMethod(Method method, IMethodHook callback) {
         return EzxHelpUtils.hookMethod(method, callback);
     }
 
@@ -235,9 +235,9 @@ public abstract class BaseHook {
      * @param clazz      目标类
      * @param methodName 方法名
      * @param args       参数类型 + IMethodHook 回调
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
-    public MethodUnhooker<?> findAndHookMethod(Class<?> clazz, String methodName, Object... args) {
+    public HookHandle findAndHookMethod(Class<?> clazz, String methodName, Object... args) {
         return EzxHelpUtils.findAndHookMethod(clazz, methodName, args);
     }
 
@@ -249,9 +249,9 @@ public abstract class BaseHook {
      * @param className  类名
      * @param methodName 方法名
      * @param args       参数类型 + IMethodHook 回调
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
-    public MethodUnhooker<?> findAndHookMethod(String className, String methodName, Object... args) {
+    public HookHandle findAndHookMethod(String className, String methodName, Object... args) {
         Class<?> clazz = findClassIfExists(className);
         if (clazz == null) {
             XposedLog.w("IHook", "findAndHookMethod: class not found: " + className);
@@ -268,9 +268,9 @@ public abstract class BaseHook {
      * @param clazz      目标类
      * @param methodName 方法名
      * @param args       参数类型 + IMethodHook 回调
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
-    public MethodUnhooker<?> findAndReplaceMethod(Class<?> clazz, String methodName, Object... args) {
+    public HookHandle findAndReplaceMethod(Class<?> clazz, String methodName, Object... args) {
         return EzxHelpUtils.findAndHookMethodReplace(clazz, methodName, args);
     }
 
@@ -282,9 +282,9 @@ public abstract class BaseHook {
      * @param className  类名
      * @param methodName 方法名
      * @param args       参数类型 + IMethodHook 回调
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
-    public MethodUnhooker<?> findAndReplaceMethod(String className, String methodName, Object... args) {
+    public HookHandle findAndReplaceMethod(String className, String methodName, Object... args) {
         Class<?> clazz = findClassIfExists(className);
         if (clazz == null) {
             XposedLog.w("BaseHook", "findAndReplaceMethod: class not found: " + className);
@@ -299,9 +299,9 @@ public abstract class BaseHook {
      * @param clazz      目标类
      * @param methodName 方法名
      * @param callback   Hook 回调
-     * @return MethodUnhooker 对象列表
+     * @return HookHandle 对象列表
      */
-    public List<MethodUnhooker<?>> hookAllMethods(Class<?> clazz, String methodName, IMethodHook callback) {
+    public List<HookHandle> hookAllMethods(Class<?> clazz, String methodName, IMethodHook callback) {
         return EzxHelpUtils.hookAllMethods(clazz, methodName, callback);
     }
 
@@ -311,9 +311,9 @@ public abstract class BaseHook {
      * @param className  类名
      * @param methodName 方法名
      * @param callback   Hook 回调
-     * @return MethodUnhooker 对象列表
+     * @return HookHandle 对象列表
      */
-    public List<MethodUnhooker<?>> hookAllMethods(String className, String methodName, IMethodHook callback) {
+    public List<HookHandle> hookAllMethods(String className, String methodName, IMethodHook callback) {
         Class<?> clazz = findClassIfExists(className);
         if (clazz == null) {
             XposedLog.w("BaseHook", "hookAllMethods: class not found: " + className);
@@ -327,9 +327,9 @@ public abstract class BaseHook {
      *
      * @param clazz    目标类
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象列表
+     * @return HookHandle 对象列表
      */
-    public List<MethodUnhooker<?>> hookAllConstructors(Class<?> clazz, IMethodHook callback) {
+    public List<HookHandle> hookAllConstructors(Class<?> clazz, IMethodHook callback) {
         return EzxHelpUtils.hookAllConstructors(clazz, callback);
     }
 
@@ -338,9 +338,9 @@ public abstract class BaseHook {
      *
      * @param className    类名
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象列表
+     * @return HookHandle 对象列表
      */
-    public List<MethodUnhooker<?>> hookAllConstructors(String className, IMethodHook callback) {
+    public List<HookHandle> hookAllConstructors(String className, IMethodHook callback) {
         Class<?> clazz = findClassIfExists(className);
         if (clazz == null) {
             XposedLog.w("BaseHook", "hookAllConstructors: class not found: " + className);

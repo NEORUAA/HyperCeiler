@@ -26,7 +26,7 @@ import io.github.kyuubiran.ezxhelper.core.finder.ConstructorFinder
 import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
 import io.github.libxposed.api.XposedInterface.Hooker
-import io.github.libxposed.api.XposedInterface.MethodUnhooker
+import io.github.libxposed.api.XposedInterface.HookHandle
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -57,9 +57,9 @@ internal object EzxHookHelper {
      *
      * @param method 要 Hook 的方法
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象，可用于取消 Hook
+     * @return HookHandle 对象，可用于取消 Hook
      */
-    fun hookMethod(method: Method, callback: IMethodHook): MethodUnhooker<*> {
+    fun hookMethod(method: Method, callback: IMethodHook): HookHandle {
         val signature = EzxMethodHelper.formatMethodSignature(method)
         return try {
             val unhook = method.createHook {
@@ -90,9 +90,9 @@ internal object EzxHookHelper {
      *
      * @param method 要 Hook 的方法
      * @param callback 替换回调
-     * @return MethodUnhooker 对象，可用于取消 Hook
+     * @return HookHandle 对象，可用于取消 Hook
      */
-    fun hookMethod(method: Method, callback: IReplaceHook): MethodUnhooker<*> {
+    fun hookMethod(method: Method, callback: IReplaceHook): HookHandle {
         val signature = EzxMethodHelper.formatMethodSignature(method)
         return try {
             val unhook = method.createHook {
@@ -117,9 +117,9 @@ internal object EzxHookHelper {
      *
      * @param constructor 要 Hook 的构造器
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象，可用于取消 Hook
+     * @return HookHandle 对象，可用于取消 Hook
      */
-    fun hookConstructor(constructor: Constructor<*>, callback: IMethodHook): MethodUnhooker<*> {
+    fun hookConstructor(constructor: Constructor<*>, callback: IMethodHook): HookHandle {
         val signature = formatConstructorSignature(constructor)
         return try {
             val unhook = constructor.createHook {
@@ -161,7 +161,7 @@ internal object EzxHookHelper {
         methodName: String,
         vararg parameterTypes: Class<*>,
         callback: IMethodHook
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         val method = EzxMethodHelper.findMethodExactIfExists(clazz, methodName, *parameterTypes)
         return hookMethod(method, callback)
     }
@@ -170,7 +170,7 @@ internal object EzxHookHelper {
         clazzName: String,
         methodName: String,
         vararg args: Any,
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         val clazz = EzxClassHelper.findClass(clazzName, safeClassLoader)
         return findAndHookMethod(clazz, methodName, *args)
     }
@@ -180,7 +180,7 @@ internal object EzxHookHelper {
         classLoader: ClassLoader,
         methodName: String,
         vararg args: Any
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         val clazz = EzxClassHelper.findClass(clazzName, classLoader)
         return findAndHookMethod(clazz, methodName, *args)
     }
@@ -191,13 +191,13 @@ internal object EzxHookHelper {
      * @param clazz 目标类
      * @param methodName 方法名
      * @param args 参数类型数组，最后一个元素必须是 IMethodHook
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
     fun findAndHookMethod(
         clazz: Class<*>,
         methodName: String,
         vararg args: Any
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         require(args.isNotEmpty()) { "args must contain at least the callback" }
         val callback = args.last()
         require(callback is IMethodHook) { "Last argument must be IMethodHook" }
@@ -213,7 +213,7 @@ internal object EzxHookHelper {
         clazzName: String,
         methodName: String,
         vararg args: Any,
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         val clazz = EzxClassHelper.findClass(clazzName, safeClassLoader)
         return findAndHookMethodReplace(clazz, methodName, *args)
     }
@@ -223,7 +223,7 @@ internal object EzxHookHelper {
         classLoader: ClassLoader,
         methodName: String,
         vararg args: Any
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         val clazz = EzxClassHelper.findClass(clazzName, classLoader)
         return findAndHookMethodReplace(clazz, methodName, *args)
     }
@@ -234,13 +234,13 @@ internal object EzxHookHelper {
      * @param clazz 目标类
      * @param methodName 方法名
      * @param args 参数类型数组，最后一个元素必须是 IReplaceHook
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
     fun findAndHookMethodReplace(
         clazz: Class<*>,
         methodName: String,
         vararg args: Any
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         require(args.isNotEmpty()) { "args must contain at least the callback" }
         val callback = args.last()
         require(callback is IReplaceHook) { "Last argument must be IReplaceHook" }
@@ -258,13 +258,13 @@ internal object EzxHookHelper {
      * @param clazz 目标类
      * @param parameterTypes 参数类型
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
     fun findAndHookConstructor(
         clazz: Class<*>,
         vararg parameterTypes: Class<*>,
         callback: IMethodHook
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         val constructor = EzxMethodHelper.findConstructorExact(clazz, *parameterTypes)
         return hookConstructor(constructor, callback)
     }
@@ -272,7 +272,7 @@ internal object EzxHookHelper {
     fun findAndHookConstructor(
         clazzName: String,
         vararg args: Any
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         val clazz = EzxClassHelper.findClass(clazzName, safeClassLoader)
         return findAndHookConstructor(clazz, *args)
     }
@@ -281,7 +281,7 @@ internal object EzxHookHelper {
         clazzName: String,
         classLoader: ClassLoader,
         vararg args: Any
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         val clazz = EzxClassHelper.findClass(clazzName, classLoader)
         return findAndHookConstructor(clazz, *args)
     }
@@ -291,9 +291,9 @@ internal object EzxHookHelper {
      *
      * @param clazz 目标类
      * @param args 参数类型数组，最后一个元素必须是 IMethodHook
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
-    fun findAndHookConstructor(clazz: Class<*>, vararg args: Any): MethodUnhooker<*> {
+    fun findAndHookConstructor(clazz: Class<*>, vararg args: Any): HookHandle {
         require(args.isNotEmpty()) { "args must contain at least the callback" }
         val callback = args.last()
         require(callback is IMethodHook) { "Last argument must be IMethodHook" }
@@ -309,7 +309,7 @@ internal object EzxHookHelper {
         clazzName: String,
         methodName: String,
         callback: IMethodHook
-    ): List<MethodUnhooker<*>> {
+    ): List<HookHandle> {
         val clazz = EzxClassHelper.findClass(clazzName, safeClassLoader)
         return hookAllMethods(clazz, methodName, callback)
     }
@@ -319,7 +319,7 @@ internal object EzxHookHelper {
         classLoader: ClassLoader,
         methodName: String,
         callback: IMethodHook
-    ): List<MethodUnhooker<*>> {
+    ): List<HookHandle> {
         val clazz = EzxClassHelper.findClass(clazzName, classLoader)
         return hookAllMethods(clazz, methodName, callback)
     }
@@ -330,13 +330,13 @@ internal object EzxHookHelper {
      * @param clazz 目标类
      * @param methodName 方法名
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象列表
+     * @return HookHandle 对象列表
      */
     fun hookAllMethods(
         clazz: Class<*>,
         methodName: String,
         callback: IMethodHook
-    ): List<MethodUnhooker<*>> {
+    ): List<HookHandle> {
         val methods = MethodFinder.fromClass(clazz)
             .filterByName(methodName)
             .toList()
@@ -364,9 +364,9 @@ internal object EzxHookHelper {
      *
      * @param clazz 目标类
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象列表
+     * @return HookHandle 对象列表
      */
-    fun hookAllConstructors(clazz: Class<*>, callback: IMethodHook): List<MethodUnhooker<*>> {
+    fun hookAllConstructors(clazz: Class<*>, callback: IMethodHook): List<HookHandle> {
         val constructors = ConstructorFinder.fromClass(clazz).toList()
 
         if (constructors.isEmpty()) {
@@ -432,7 +432,13 @@ internal object EzxHookHelper {
             }
     }
 
-    fun libHook(method: Method, hooker: Class<out Hooker>): MethodUnhooker<Method?> {
-        return EzxModuleHolder.xposedModule.hook(method, hooker)
+    fun libHook(method: Method, hooker: Class<out Hooker>): HookHandle {
+        val instance = try {
+            hooker.getDeclaredConstructor().newInstance()
+        } catch (t: Throwable) {
+            throw IllegalStateException("Hooker must have a public no-arg constructor: $hooker", t)
+        }
+        return EzxModuleHolder.xposedModule.hook(method)
+            .intercept(instance)
     }
 }

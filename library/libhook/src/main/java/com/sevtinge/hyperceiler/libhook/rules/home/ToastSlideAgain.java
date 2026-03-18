@@ -25,10 +25,10 @@ import com.sevtinge.hyperceiler.libhook.callback.IMethodHook;
 
 import io.github.kyuubiran.ezxhelper.xposed.common.AfterHookParam;
 import io.github.kyuubiran.ezxhelper.xposed.common.BeforeHookParam;
-import io.github.libxposed.api.XposedInterface.MethodUnhooker;
+import io.github.libxposed.api.XposedInterface.HookHandle;
 
 public class ToastSlideAgain extends BaseHook {
-    public MethodUnhooker<?> unhook = null;
+    public HookHandle unhook = null;
 
     @Override
     public void init() {
@@ -64,7 +64,7 @@ public class ToastSlideAgain extends BaseHook {
         );
     }
 
-    public MethodUnhooker<?> hookToast() {
+    public HookHandle hookToast() {
         return findAndHookMethod(findClassIfExists("android.widget.Toast"),
             "show", new IMethodHook() {
                 @Override
@@ -76,7 +76,7 @@ public class ToastSlideAgain extends BaseHook {
         );
     }
 
-    public void unHook(MethodUnhooker<?> unhook) {
+    public void unHook(HookHandle unhook) {
         if (unhook != null) {
             unhook.unhook();
             // logI("the unhook is: " + unhook);

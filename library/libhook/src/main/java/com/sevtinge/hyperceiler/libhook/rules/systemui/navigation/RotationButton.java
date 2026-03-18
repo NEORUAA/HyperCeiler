@@ -142,7 +142,7 @@ public class RotationButton extends BaseHook {
             findAndHookMethod("com.android.systemui.navigationbar.NavigationBar",
                 "onRotationProposal", int.class, boolean.class,
                 new IMethodHook() {
-                    XposedInterface.MethodUnhooker<?> unhook;
+                    XposedInterface.HookHandle unhook;
 
                     @Override
                     public void before(BeforeHookParam param) {

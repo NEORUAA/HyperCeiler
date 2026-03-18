@@ -30,7 +30,7 @@ import com.sevtinge.hyperceiler.libhook.utils.hookapi.tool.internal.EzxHookHelpe
 import com.sevtinge.hyperceiler.libhook.utils.hookapi.tool.internal.EzxMethodHelper
 import com.sevtinge.hyperceiler.libhook.utils.hookapi.tool.internal.EzxModuleHolder
 import io.github.libxposed.api.XposedInterface.Hooker
-import io.github.libxposed.api.XposedInterface.MethodUnhooker
+import io.github.libxposed.api.XposedInterface.HookHandle
 import io.github.libxposed.api.XposedModule
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
@@ -459,10 +459,10 @@ object EzxHelpUtils {
      *
      * @param method 要 Hook 的方法
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象，可用于取消 Hook
+     * @return HookHandle 对象，可用于取消 Hook
      */
     @JvmStatic
-    fun hookMethod(method: Method, callback: IMethodHook): MethodUnhooker<*> =
+    fun hookMethod(method: Method, callback: IMethodHook): HookHandle =
         EzxHookHelper.hookMethod(method, callback)
 
     /**
@@ -470,10 +470,10 @@ object EzxHelpUtils {
      *
      * @param method 要 Hook 的方法
      * @param callback 替换回调
-     * @return MethodUnhooker 对象，可用于取消 Hook
+     * @return HookHandle 对象，可用于取消 Hook
      */
     @JvmStatic
-    fun hookMethod(method: Method, callback: IReplaceHook): MethodUnhooker<*> =
+    fun hookMethod(method: Method, callback: IReplaceHook): HookHandle =
         EzxHookHelper.hookMethod(method, callback)
 
     /**
@@ -481,10 +481,10 @@ object EzxHelpUtils {
      *
      * @param constructor 要 Hook 的构造器
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象，可用于取消 Hook
+     * @return HookHandle 对象，可用于取消 Hook
      */
     @JvmStatic
-    fun hookConstructor(constructor: Constructor<*>, callback: IMethodHook): MethodUnhooker<*> =
+    fun hookConstructor(constructor: Constructor<*>, callback: IMethodHook): HookHandle =
         EzxHookHelper.hookConstructor(constructor, callback)
 
     /**
@@ -502,7 +502,7 @@ object EzxHelpUtils {
         methodName: String,
         vararg parameterTypes: Class<*>,
         callback: IMethodHook
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         val method = EzxMethodHelper.findMethodExactIfExists(clazz, methodName, *parameterTypes)
         return EzxHookHelper.hookMethod(method, callback)
     }
@@ -512,7 +512,7 @@ object EzxHelpUtils {
         clazzName: String,
         methodName: String,
         vararg args: Any,
-    ): MethodUnhooker<*> = EzxHookHelper.findAndHookMethod(clazzName, methodName, *args)
+    ): HookHandle = EzxHookHelper.findAndHookMethod(clazzName, methodName, *args)
 
     @JvmStatic
     fun findAndHookMethod(
@@ -520,7 +520,7 @@ object EzxHelpUtils {
         classLoader: ClassLoader,
         methodName: String,
         vararg args: Any
-    ): MethodUnhooker<*> = EzxHookHelper.findAndHookMethod(clazzName, classLoader, methodName, *args)
+    ): HookHandle = EzxHookHelper.findAndHookMethod(clazzName, classLoader, methodName, *args)
 
     /**
      * 查找并 Hook 方法
@@ -528,21 +528,21 @@ object EzxHelpUtils {
      * @param clazz 目标类
      * @param methodName 方法名
      * @param args 参数类型数组，最后一个元素必须是 IMethodHook
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
     @JvmStatic
     fun findAndHookMethod(
         clazz: Class<*>,
         methodName: String,
         vararg args: Any
-    ): MethodUnhooker<*> = EzxHookHelper.findAndHookMethod(clazz, methodName, *args)
+    ): HookHandle = EzxHookHelper.findAndHookMethod(clazz, methodName, *args)
 
     @JvmStatic
     fun findAndHookMethodReplace(
         clazzName: String,
         methodName: String,
         vararg args: Any,
-    ): MethodUnhooker<*> = EzxHookHelper.findAndHookMethodReplace(clazzName, methodName, *args)
+    ): HookHandle = EzxHookHelper.findAndHookMethodReplace(clazzName, methodName, *args)
 
     @JvmStatic
     fun findAndHookMethodReplace(
@@ -550,7 +550,7 @@ object EzxHelpUtils {
         classLoader: ClassLoader,
         methodName: String,
         vararg args: Any
-    ): MethodUnhooker<*> = EzxHookHelper.findAndHookMethodReplace(clazzName, classLoader, methodName, *args)
+    ): HookHandle = EzxHookHelper.findAndHookMethodReplace(clazzName, classLoader, methodName, *args)
 
     /**
      * 查找并 Hook 方法（替换模式）
@@ -558,14 +558,14 @@ object EzxHelpUtils {
      * @param clazz 目标类
      * @param methodName 方法名
      * @param args 参数类型数组，最后一个元素必须是 IReplaceHook
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
     @JvmStatic
     fun findAndHookMethodReplace(
         clazz: Class<*>,
         methodName: String,
         vararg args: Any
-    ): MethodUnhooker<*> = EzxHookHelper.findAndHookMethodReplace(clazz, methodName, *args)
+    ): HookHandle = EzxHookHelper.findAndHookMethodReplace(clazz, methodName, *args)
 
     /**
      * 查找并 Hook 构造器
@@ -573,14 +573,14 @@ object EzxHelpUtils {
      * @param clazz 目标类
      * @param parameterTypes 参数类型
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
     @JvmStatic
     fun findAndHookConstructor(
         clazz: Class<*>,
         vararg parameterTypes: Class<*>,
         callback: IMethodHook
-    ): MethodUnhooker<*> {
+    ): HookHandle {
         val constructor = EzxMethodHelper.findConstructorExact(clazz, *parameterTypes)
         return EzxHookHelper.hookConstructor(constructor, callback)
     }
@@ -589,24 +589,24 @@ object EzxHelpUtils {
     fun findAndHookConstructor(
         clazzName: String,
         vararg args: Any
-    ): MethodUnhooker<*> = EzxHookHelper.findAndHookConstructor(clazzName, *args)
+    ): HookHandle = EzxHookHelper.findAndHookConstructor(clazzName, *args)
 
     @JvmStatic
     fun findAndHookConstructor(
         clazzName: String,
         classLoader: ClassLoader,
         vararg args: Any
-    ): MethodUnhooker<*> = EzxHookHelper.findAndHookConstructor(clazzName, classLoader, *args)
+    ): HookHandle = EzxHookHelper.findAndHookConstructor(clazzName, classLoader, *args)
 
     /**
      * 查找并 Hook 构造器
      *
      * @param clazz 目标类
      * @param args 参数类型数组，最后一个元素必须是 IMethodHook
-     * @return MethodUnhooker 对象
+     * @return HookHandle 对象
      */
     @JvmStatic
-    fun findAndHookConstructor(clazz: Class<*>, vararg args: Any): MethodUnhooker<*> =
+    fun findAndHookConstructor(clazz: Class<*>, vararg args: Any): HookHandle =
         EzxHookHelper.findAndHookConstructor(clazz, *args)
 
     @JvmStatic
@@ -614,7 +614,7 @@ object EzxHelpUtils {
         clazzName: String,
         methodName: String,
         callback: IMethodHook
-    ): List<MethodUnhooker<*>> = EzxHookHelper.hookAllMethods(clazzName, methodName, callback)
+    ): List<HookHandle> = EzxHookHelper.hookAllMethods(clazzName, methodName, callback)
 
     @JvmStatic
     fun hookAllMethods(
@@ -622,7 +622,7 @@ object EzxHelpUtils {
         classLoader: ClassLoader,
         methodName: String,
         callback: IMethodHook
-    ): List<MethodUnhooker<*>> = EzxHookHelper.hookAllMethods(clazzName, classLoader, methodName, callback)
+    ): List<HookHandle> = EzxHookHelper.hookAllMethods(clazzName, classLoader, methodName, callback)
 
     /**
      * Hook 类中所有指定名称的方法
@@ -630,24 +630,24 @@ object EzxHelpUtils {
      * @param clazz 目标类
      * @param methodName 方法名
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象列表
+     * @return HookHandle 对象列表
      */
     @JvmStatic
     fun hookAllMethods(
         clazz: Class<*>,
         methodName: String,
         callback: IMethodHook
-    ): List<MethodUnhooker<*>> = EzxHookHelper.hookAllMethods(clazz, methodName, callback)
+    ): List<HookHandle> = EzxHookHelper.hookAllMethods(clazz, methodName, callback)
 
     /**
      * Hook 类中所有构造器
      *
      * @param clazz 目标类
      * @param callback Hook 回调
-     * @return MethodUnhooker 对象列表
+     * @return HookHandle 对象列表
      */
     @JvmStatic
-    fun hookAllConstructors(clazz: Class<*>, callback: IMethodHook): List<MethodUnhooker<*>> =
+    fun hookAllConstructors(clazz: Class<*>, callback: IMethodHook): List<HookHandle> =
         EzxHookHelper.hookAllConstructors(clazz, callback)
 
     // ==================== 便捷 Hook 工具 ====================
@@ -677,7 +677,7 @@ object EzxHelpUtils {
         EzxHookHelper.deoptimizeMethods(clazz, *names)
 
     @JvmStatic
-    fun libHook(method: Method, hooker: Class<out Hooker>): MethodUnhooker<Method?> =
+    fun libHook(method: Method, hooker: Class<out Hooker>): HookHandle =
         EzxHookHelper.libHook(method, hooker)
 
     @JvmStatic

@@ -26,7 +26,7 @@ public class DigestCreakPatch extends CorePatchHelper {
 
     private final String TAG = "DigestCreak/UsePreSignPatch";
 
-    public void init(XposedModuleInterface.SystemServerLoadedParam lpparam) {
+    public void init(XposedModuleInterface.SystemServerStartingParam lpparam) {
         // Android 14+
         try {
             findAndHookMethod("com.android.server.pm.InstallPackageHelper", lpparam.getClassLoader(),

@@ -32,8 +32,11 @@ import com.sevtinge.hyperceiler.common.log.XposedLog;
 import java.util.HashMap;
 
 import io.github.kyuubiran.ezxhelper.xposed.EzXposed;
-import io.github.libxposed.api.XposedInterface;
 import io.github.libxposed.api.XposedModule;
+import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam;
+import io.github.libxposed.api.XposedModuleInterface.PackageLoadedParam;
+import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam;
+import io.github.libxposed.api.XposedModuleInterface.SystemServerStartingParam;
 
 /**
  * Xposed 模块入口基类
@@ -46,17 +49,19 @@ public class XposedInitEntry extends XposedModule {
 
     protected String processName;
 
-    public XposedInitEntry(@NonNull XposedInterface base, @NonNull ModuleLoadedParam param) {
-        super(base, param);
+    @Override
+    public void onModuleLoaded(@NonNull ModuleLoadedParam param) {
         processName = param.getProcessName();
 
-        XposedLog.init(base);
-        BaseLoad.init(base);
-        EzXposed.initXposedModule(base);
+        XposedLog.init(this);
+        BaseLoad.init(this);
+        EzXposed.initXposedModule(this);
+        EzxHelpUtils.setXposedModule(this);
     }
 
     @Override
-    public void onSystemServerLoaded(@NonNull final SystemServerLoadedParam lpparam) {
+    public void onSystemServerStarting(@NonNull final SystemServerStartingParam lpparam) {
+        EzXposed.initOnSystemServerStarting(lpparam);
         // load preferences
         initPrefs();
         if (isModuleReady()) {
@@ -91,26 +96,33 @@ public class XposedInitEntry extends XposedModule {
     @Override
     public void onPackageLoaded(@NonNull final PackageLoadedParam lpparam) {
         super.onPackageLoaded(lpparam);
-        if (!lpparam.isFirstPackage()) return;
+        if (!isFirstPackage(lpparam)) return;
+        EzXposed.initOnPackageLoaded(lpparam);
+    }
+
+    @Override
+    public void onPackageReady(@NonNull final PackageReadyParam param) {
+        super.onPackageReady(param);
+        if (!isFirstPackage(param)) return;
         // load preferences
         initPrefs();
         if (isModuleReady()) {
-            XposedLog.w(TAG, lpparam.getPackageName(), "Skip loading hooks because OOBE is not completed.");
+            XposedLog.w(TAG, param.getPackageName(), "Skip loading hooks because OOBE is not completed.");
             return;
         }
         // load EzXposed
-        EzXposed.initOnPackageLoaded(lpparam);
+        EzXposed.initOnPackageReady(param);
         // invoke module
-        invokeInit(lpparam);
+        invokeInit(param);
         // Sync preferences changes
         //loadPreferenceChange();
     }
 
-    protected void invokeInit(PackageLoadedParam lpparam) {
+    protected void invokeInit(PackageReadyParam lpparam) {
         invokeInitInternal(lpparam.getPackageName(), module -> module.onLoad(lpparam));
     }
 
-    protected void invokeInit(SystemServerLoadedParam lpparam) {
+    protected void invokeInit(SystemServerStartingParam lpparam) {
         invokeInitInternal(BaseLoad.SYSTEM_SERVER, module -> module.onLoad(lpparam));
     }
 
@@ -167,6 +179,18 @@ public class XposedInitEntry extends XposedModule {
 
     private boolean isModuleReady() {
         return !PrefsBridge.getBoolean("allow_hook", false);
+    }
+
+    private boolean isFirstPackage(Object param) {
+        try {
+            var method = param.getClass().getMethod("isFirstPackage");
+            var value = method.invoke(param);
+            if (value instanceof Boolean) {
+                return (Boolean) value;
+            }
+        } catch (Throwable ignored) {
+        }
+        return true;
     }
 
 }

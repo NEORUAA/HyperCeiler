@@ -11,6 +11,8 @@
 -keep class com.sevtinge.hyperceiler.ui.** { *; }
 -keep class com.sevtinge.hyperceiler.main.** { *; }
 -keep class com.fan.** { *; }
+-dontwarn io.github.libxposed.service.IXposedService
+-dontwarn io.github.libxposed.service.IXposedService$Stub
 
 # --- Obfuscation ---
 -keepattributes SourceFile,LineNumberTable,Signature

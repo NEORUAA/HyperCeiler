@@ -14,7 +14,7 @@ public class ExactSignCheckPatch extends CorePatchHelper {
 
     private final String TAG = "ExactSignCheckPatch";
 
-    public void init(XposedModuleInterface.SystemServerLoadedParam lpparam) {
+    public void init(XposedModuleInterface.SystemServerStartingParam lpparam) {
         // Android 11+
         try {
             Class<?> signingDetails = getSigningDetails(lpparam.getClassLoader());

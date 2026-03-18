@@ -79,7 +79,7 @@ public class ResourcesTool {
     private Handler mHandler = null;
 
     private final CopyOnWriteArrayList<Resources> resourcesArrayList = new CopyOnWriteArrayList<>();
-    private final CopyOnWriteArrayList<XposedInterface.MethodUnhooker<?>> unhooks = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<XposedInterface.HookHandle> unhooks = new CopyOnWriteArrayList<>();
     private final ConcurrentHashMap<ResKey, Pair<ReplacementType, Object>> replacements = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Integer, ResKey> resIdCache = new ConcurrentHashMap<>();
 
@@ -308,7 +308,7 @@ public class ResourcesTool {
             if (!shouldHookResourcesMethod(name, paramTypes, mask)) continue;
 
             try {
-                XposedInterface.MethodUnhooker<?> unhook = EzxHelpUtils.hookMethod(method, ResHooker);
+                XposedInterface.HookHandle unhook = EzxHelpUtils.hookMethod(method, ResHooker);
                 unhooks.add(unhook);
             } catch (Throwable t) {
                 XposedLog.e(TAG, "Failed to hook Resources." + name, t);
@@ -357,7 +357,7 @@ public class ResourcesTool {
             if (!isNeedHook(method, name, mask)) continue;
 
             try {
-                XposedInterface.MethodUnhooker<?> unhook = EzxHelpUtils.hookMethod(method, TypedArrayHooker);
+                XposedInterface.HookHandle unhook = EzxHelpUtils.hookMethod(method, TypedArrayHooker);
                 unhooks.add(unhook);
             } catch (Throwable t) {
                 XposedLog.e(TAG, "Failed to hook TypedArray." + name, t);
@@ -383,7 +383,7 @@ public class ResourcesTool {
      * 卸载所有 hook 并重置状态
      */
     public synchronized void unHookRes() {
-        for (XposedInterface.MethodUnhooker<?> unhook : unhooks) {
+        for (XposedInterface.HookHandle unhook : unhooks) {
             unhook.unhook();
         }
         unhooks.clear();

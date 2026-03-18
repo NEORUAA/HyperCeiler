@@ -28,7 +28,7 @@ import io.github.libxposed.api.XposedInterface;
 ;
 
 public class EnablePdf extends BaseHook {
-    XposedInterface.MethodUnhooker isGlobal;
+    XposedInterface.HookHandle isGlobal;
 
     @Override
     public void init() {

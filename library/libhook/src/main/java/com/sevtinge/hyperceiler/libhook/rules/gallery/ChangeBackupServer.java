@@ -37,7 +37,7 @@ public class ChangeBackupServer extends BaseHook {
 
         if (isOneDrive) {
             findAndHookMethod("com.miui.gallery.ui.GallerySettingsFragment", "initGlobalBackupPreference", new IMethodHook() {
-                XposedInterface.MethodUnhooker isInternationalHook;
+                XposedInterface.HookHandle isInternationalHook;
 
                 @Override
                 public void before(BeforeHookParam param) {
@@ -66,7 +66,7 @@ public class ChangeBackupServer extends BaseHook {
         } else {
             if (isXiaomi) {
                 findAndHookMethod("com.miui.gallery.ui.GallerySettingsFragment", "initGlobalBackupPreference", new IMethodHook() {
-                    XposedInterface.MethodUnhooker isInternationalHook;
+                    XposedInterface.HookHandle isInternationalHook;
 
                     @Override
                     public void before(BeforeHookParam param) {

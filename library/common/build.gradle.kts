@@ -39,6 +39,6 @@ java {
 
 dependencies {
     api(libs.bundles.miuix)
-    // libxposed API 100
+    // libxposed API 101
     compileOnlyApi(libs.libxposed.api)
 }

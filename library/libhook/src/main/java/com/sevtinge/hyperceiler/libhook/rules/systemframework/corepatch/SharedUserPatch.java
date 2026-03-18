@@ -19,7 +19,7 @@ public class SharedUserPatch extends CorePatchHelper {
 
     private static final String TAG = "SharedUserPatch";
 
-    public void init(XposedModuleInterface.SystemServerLoadedParam lpparam) {
+    public void init(XposedModuleInterface.SystemServerStartingParam lpparam) {
         // Android 14+
         try {
             var utilClass = findClass("com.android.server.pm.ReconcilePackageUtils", lpparam.getClassLoader());

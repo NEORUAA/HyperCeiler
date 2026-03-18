@@ -52,7 +52,7 @@ public class UnlockIme extends BaseHook {
         }
     }
 
-    private void startHook(XposedModuleInterface.PackageLoadedParam param) {
+    private void startHook(XposedModuleInterface.PackageReadyParam param) {
         // 检查是否为小米定制输入法
         boolean isNonCustomize = true;
         for (String isMiui : miuiImeList) {

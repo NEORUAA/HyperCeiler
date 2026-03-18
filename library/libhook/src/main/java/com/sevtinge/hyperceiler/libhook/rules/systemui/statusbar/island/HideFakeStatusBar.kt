@@ -75,7 +75,7 @@ object HideFakeStatusBar : MusicBaseHook() {
         loadClass("com.android.systemui.qs.MiuiNotificationHeaderView")
     }
 
-    private var unhook0: XposedInterface.MethodUnhooker<*>? = null
+    private var unhook0: XposedInterface.HookHandle? = null
 
     private fun updateLayout() {
         if (isShowingFocused.value && isLyric.value && !showCLock) {

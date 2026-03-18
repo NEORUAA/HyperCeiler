@@ -31,7 +31,7 @@ import com.sevtinge.hyperceiler.libhook.callback.IMethodHook
 import com.sevtinge.hyperceiler.libhook.callback.IReplaceHook
 import io.github.kyuubiran.ezxhelper.xposed.common.AfterHookParam
 import io.github.kyuubiran.ezxhelper.xposed.common.BeforeHookParam
-import io.github.libxposed.api.XposedInterface.MethodUnhooker
+import io.github.libxposed.api.XposedInterface.HookHandle
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Member
@@ -80,7 +80,7 @@ inline fun Class<*>.beforeHookMethod(
     methodName: String,
     vararg args: Any,
     crossinline block: (BeforeHookParam) -> Unit
-): MethodUnhooker<*> {
+): HookHandle {
     return EzxHelpUtils.findAndHookMethod(
         this, methodName, *args,
         object : IMethodHook {
@@ -93,7 +93,7 @@ inline fun Class<*>.afterHookMethod(
     methodName: String,
     vararg args: Any,
     crossinline block: (AfterHookParam) -> Unit
-): MethodUnhooker<*> {
+): HookHandle {
     return EzxHelpUtils.findAndHookMethod(
         this, methodName, *args,
         object : IMethodHook {
@@ -106,7 +106,7 @@ inline fun Class<*>.hookMethod(
     methodName: String,
     vararg args: Any,
     block: MethodHookBuilder.() -> Unit
-): MethodUnhooker<*> {
+): HookHandle {
     val builder = MethodHookBuilder()
     builder.block()
     return EzxHelpUtils.findAndHookMethod(this, methodName, *args, builder.build())
@@ -115,7 +115,7 @@ inline fun Class<*>.hookMethod(
 inline fun Class<*>.hookAllMethods(
     methodName: String,
     block: MethodHookBuilder.() -> Unit
-): List<MethodUnhooker<*>> {
+): List<HookHandle> {
     val builder = MethodHookBuilder()
     builder.block()
     return EzxHelpUtils.hookAllMethods(this, methodName, builder.build())
@@ -125,7 +125,7 @@ inline fun Class<*>.replaceMethod(
     methodName: String,
     vararg args: Any,
     crossinline block: (BeforeHookParam) -> Any?
-): MethodUnhooker<*> {
+): HookHandle {
     return EzxHelpUtils.findAndHookMethodReplace(
         this, methodName, *args,
         object : IReplaceHook {
@@ -139,7 +139,7 @@ inline fun Class<*>.replaceMethod(
 inline fun Class<*>.beforeHookConstructor(
     vararg args: Any,
     crossinline block: (BeforeHookParam) -> Unit
-): MethodUnhooker<*> {
+): HookHandle {
     return EzxHelpUtils.findAndHookConstructor(
         this, *args,
         object : IMethodHook {
@@ -151,7 +151,7 @@ inline fun Class<*>.beforeHookConstructor(
 inline fun Class<*>.afterHookConstructor(
     vararg args: Any,
     crossinline block: (AfterHookParam) -> Unit
-): MethodUnhooker<*> {
+): HookHandle {
     return EzxHelpUtils.findAndHookConstructor(
         this, *args,
         object : IMethodHook {
@@ -163,7 +163,7 @@ inline fun Class<*>.afterHookConstructor(
 inline fun Class<*>.hookConstructor(
     vararg args: Any,
     block: MethodHookBuilder.() -> Unit
-): MethodUnhooker<*> {
+): HookHandle {
     val builder = MethodHookBuilder()
     builder.block()
     return EzxHelpUtils.findAndHookConstructor(this, *args, builder.build())
@@ -171,20 +171,20 @@ inline fun Class<*>.hookConstructor(
 
 inline fun Class<*>.hookAllConstructors(
     block: MethodHookBuilder.() -> Unit
-): List<MethodUnhooker<*>> {
+): List<HookHandle> {
     val builder = MethodHookBuilder()
     builder.block()
     return EzxHelpUtils.hookAllConstructors(this, builder.build())
 }
 
 
-fun Method.hook(callback: IMethodHook): MethodUnhooker<*> =
+fun Method.hook(callback: IMethodHook): HookHandle =
     EzxHelpUtils.hookMethod(this, callback)
 
-fun Method.hookReplace(callback: IReplaceHook): MethodUnhooker<*> =
+fun Method.hookReplace(callback: IReplaceHook): HookHandle =
     EzxHelpUtils.hookMethod(this, callback)
 
-fun Constructor<*>.hook(callback: IMethodHook): MethodUnhooker<*> =
+fun Constructor<*>.hook(callback: IMethodHook): HookHandle =
     EzxHelpUtils.hookConstructor(this, callback)
 
 fun Method.deoptimizeMethod() = EzxHelpUtils.deoptimize(this)
