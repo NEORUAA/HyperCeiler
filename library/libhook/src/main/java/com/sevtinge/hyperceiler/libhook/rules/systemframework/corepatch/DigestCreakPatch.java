@@ -174,7 +174,7 @@ public class DigestCreakPatch extends CorePatchHelper {
                 var shouldBypass = new ThreadLocal<Boolean>();
                 hookAllMethods(keySetManagerClass, "shouldCheckUpgradeKeySetLocked", new IMethodHook() {
                     @Override
-                    public void after(AfterHookParam param) {
+                    public void before(BeforeHookParam param) {
                         // 检查权限定义的签名的时候，如果定义包名相同，会使用 KeySetManagerService
                         // 我们利用这一点让它通过检查，也就是同包不同签名权限可覆盖
                         // R-Sv2: PackageManagerService#preparePackageLI
@@ -183,20 +183,28 @@ public class DigestCreakPatch extends CorePatchHelper {
                         // https://cs.android.com/android/platform/superproject/+/android-14.0.0_r2:frameworks/base/services/core/java/com/android/server/pm/InstallPackageHelper.java;l=1097;drc=5ea7e53c3a787e25af86b0f31933ddd68ae3514e
                         // 16: InstallPackageHelper#preparePackage
                         // https://cs.android.com/android/platform/superproject/+/android-16.0.0_r2:frameworks/base/services/core/java/com/android/server/pm/InstallPackageHelper.java;l=1459;drc=d14620262929e39a409b55d11cb542c1d1c4d2f6
-                        if (prefs.getBoolean("prefs_key_system_framework_core_patch_digest_creak", true) && Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch((o) -> o.getMethodName().startsWith("preparePackage"))) {
-                            shouldBypass.set(true);
+                        if (prefs.getBoolean("prefs_key_system_framework_core_patch_digest_creak", true)
+                            && Arrays.stream(Thread.currentThread().getStackTrace())
+                                .anyMatch((o) -> o.getMethodName().startsWith("preparePackage"))) {
+                            shouldBypass.set(Boolean.TRUE);
                             param.setResult(true);
                         } else {
-                            shouldBypass.set(false);
+                            shouldBypass.set(Boolean.FALSE);
                         }
                     }
                 });
                 hookAllMethods(keySetManagerClass, "checkUpgradeKeySetLocked", new IMethodHook() {
                     @Override
-                    public void after(AfterHookParam param) {
-                        if (prefs.getBoolean("prefs_key_system_framework_core_patch_digest_creak", true) && shouldBypass.get()) {
+                    public void before(BeforeHookParam param) {
+                        if (prefs.getBoolean("prefs_key_system_framework_core_patch_digest_creak", true)
+                            && Boolean.TRUE.equals(shouldBypass.get())) {
                             param.setResult(true);
                         }
+                    }
+
+                    @Override
+                    public void after(AfterHookParam param) {
+                        shouldBypass.remove();
                     }
                 });
             }
